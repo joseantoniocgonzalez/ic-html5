@@ -5,15 +5,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: pip
-      run: sudo  pip install html5validator
-    - name: Test html5
+    
+    - name: Instalar html5validator
+      run: sudo pip install html5validator
+    
+    - name: Validar HTML5
       run: html5validator --root _build/
-    - name: Install node
+    
+    - name: Instalar Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 8
-    - name: Install surge
+        node-version: 14
+    
+    - name: Instalar Surge
       run: npm install -g surge
-    - name: Deploy to josedom24@surge.sh
-      run: surge ./_build/ josedom24.surge.sh --token ${{ secrets.SURGE_TOKEN }}   
+    
+    - name: Desplegar en Surge
+      run: surge ./_build/ mi-prueba-jose123.surge.sh --token ${{ secrets.SURGE_TOKEN }}
