@@ -1,32 +1,70 @@
 pipeline {
-    environment {
-        TOKEN = credentials('SURGE_TOKEN')  // Token guardado en Jenkins
-    }
     agent {
         docker {
-            image 'josedom24/debian-npm'  // Imagen con npm preinstalado
-            args '-u root:root'          // Ejecutar como root
+            image 'josedom24/debian-npm'
+            args '-u root:root'
         }
     }
+   
+    environment {
+        TOKEN = credentials('SURGE_TOKEN')
+    }
+   
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                echo '🔄 Clonando tu repositorio...'
-                git branch: 'master', url: 'https://github.com/joseantoniocgonzalez/ic-html5.git'
+                git branch: 'master', url: 'https://github.com/javierasping/taller2_ic-html5.git'
             }
         }
-
-        stage('Install surge') {
+       
+        stage('Change Repositories to HTTPS') {
             steps {
-                echo '📦 Instalando Surge...'
-                sh 'npm install -g surge'
+                script {
+                    sh """
+                    sed -i 's/http:/https:/g' /etc/apt/sources.list
+                    apt update
+                    """
+                }
             }
         }
-
+       
+        stage('Install Surge') {
+            steps {
+                script {
+                    sh 'npm install -g surge'
+                }
+            }
+        }
+       
+        stage('Install Pip') {
+            steps {
+                script {
+                    sh 'apt update -y && apt install pip default-jre -y'
+                }
+            }
+        }
+       
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    sh 'pip install html5validator '
+                }
+            }
+        }
+       
+        stage('Test HTML') {
+            steps {
+                script {
+                    sh 'html5validator --root _build/'
+                }
+            }
+        }
+       
         stage('Deploy') {
             steps {
-                echo '🚀 Desplegando en Surge.sh...'
-                sh 'surge ./_build/ joseantoniocgonzalez.surge.sh --token $TOKEN'
+                script {
+                    sh 'surge ./_build/ javierasping.surge.sh --token $TOKEN'
+                }
             }
         }
     }
